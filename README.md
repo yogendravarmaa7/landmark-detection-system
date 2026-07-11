@@ -257,15 +257,6 @@ Dataset citation:
 
 ---
 
-## 👤 Author
 
-**Yogendra Varma Addepalli**
-- 🌐 Portfolio: [yogendravarmaa7.github.io](https://yogendravarmaa7.github.io)
-- 💼 LinkedIn: [linkedin.com/in/yaddepalli](https://linkedin.com/in/yaddepalli)
-- 📧 Email: addepalliyogendravarma@gmail.com
 
 ---
-
-## 📄 License
-
-This project is licensed under the MIT License.
