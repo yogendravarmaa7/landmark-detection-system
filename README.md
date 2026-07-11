@@ -247,13 +247,6 @@ Dataset citation:
 ```
 
 ---
-## 👤 Author
-
-**Yogendra Varma Addepalli**
-- 🌐 Portfolio: yogendravarmaa7.github.io
-- 💼 LinkedIn: linkedin.com/in/yaddepalli
-- 📧 Email: addepalliyogendravarma@gmail.com
-## 🔮 Future Enhancements
 
 - Extended to additional anatomical landmark datasets
 - Integration with clinical imaging pipelines
@@ -262,6 +255,13 @@ Dataset citation:
 
 ---
 
+## 👤 Author
+
+**Yogendra Varma Addepalli**
+- 🌐 Portfolio: yogendravarmaa7.github.io
+- 💼 LinkedIn: linkedin.com/in/yaddepalli
+- 📧 Email: addepalliyogendravarma@gmail.com
+## 🔮 Future Enhancements
 
 
 ---
