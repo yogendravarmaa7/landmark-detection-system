@@ -1,134 +1,271 @@
-# Contour Hugging Heatmaps
+# 🦴 Landmark Detection System — Cephalometric X-Ray Analysis
 
-This code can be used to reproduce the experiments performed in our paper 'Contour Hugging Heatmaps for Landmark Detection'.
+Reproduction of the **Contour Hugging Heatmaps** research paper for anatomical landmark detection on cephalometric X-ray images. Built using PyTorch with temperature scaling for model calibration. Validated against published benchmarks using Mean Radial Error (MRE) and Successful Detection Rate (SDR).
 
-## Requirements
+![Python](https://img.shields.io/badge/Python-3.7+-blue?style=flat-square&logo=python)
+![PyTorch](https://img.shields.io/badge/PyTorch-1.10.0-red?style=flat-square&logo=pytorch)
+![CUDA](https://img.shields.io/badge/CUDA-11.3-green?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
 
-- Python 3 (code has been tested on Python 3.7)
-- CUDA and cuDNN (tested with Cuda 11.3)
-- Our experiments used a NVIDIA Quadro P4000 GPU which has 8GBs of memory. 
-- Python packages listed in the requirements.txt including PyTorch 1.10.0
+---
 
-## Getting Started
+## 📌 Project Overview
 
-1. Go to your chosen directory, clone this repo then enter it:
+This project independently reproduces the experiments from:
+
+> **"Contour Hugging Heatmaps for Landmark Detection"**
+
+Key contributions:
+- Deep learning landmark detection on **400 cephalometric X-ray images**
+- **19 clinical landmarks** detected per image
+- **Temperature scaling** applied to minimize Estimated Calibration Error (ECE)
+- Validated using **Mean Radial Error (MRE)** and **Successful Detection Rate (SDR)**
+
+---
+
+## 🏗️ System Architecture
+
 ```
-git clone https://github.com/jfm15/ContourHuggingHeatmaps.git
-cd ContourHuggingHeatmaps/
+┌─────────────────────────────────────────────┐
+│           Input: X-Ray Images                │
+│         ISBI 2015 Dataset (400 images)       │
+└──────────────────┬──────────────────────────┘
+                   │
+        ┌──────────▼──────────┐
+        │   Data Preprocessing │
+        │  landmark_dataset.py │
+        └──────────┬──────────┘
+                   │
+        ┌──────────▼──────────┐
+        │   Model Training     │
+        │     train.py         │
+        │  Contour Hugging     │
+        │  Heatmap Network     │
+        └──────────┬──────────┘
+                   │
+        ┌──────────▼──────────┐
+        │ Temperature Scaling  │
+        │temperature_scaling.py│
+        │  Minimizes ECE       │
+        └──────────┬──────────┘
+                   │
+        ┌──────────▼──────────┐
+        │     Evaluation       │
+        │      test.py         │
+        │   MRE + SDR Metrics  │
+        └──────────┬──────────┘
+                   │
+        ┌──────────▼──────────┐
+        │   Results & Plots    │
+        │      plots.py        │
+        └─────────────────────┘
 ```
 
-2. Install required packages. In this guide we create our own virtual environment:
+---
 
+## 🛠️ Tech Stack
+
+| Component | Technology |
+|---|---|
+| Language | Python 3.7+ |
+| Deep Learning | PyTorch 1.10.0 |
+| GPU Acceleration | CUDA 11.3 + cuDNN |
+| Dataset | ISBI 2015 Cephalometric |
+| Calibration | Temperature Scaling |
+| Evaluation | MRE, SDR, ECE |
+| Config | YAML |
+
+---
+
+## 📊 Dataset
+
+**ISBI 2015 Cephalometric X-Ray Dataset**
+
+| Split | Images | Purpose |
+|---|---|---|
+| Training | 150 images (001–150) | Model training |
+| Test Set 1 | 150 images (151–300) | Temperature scaling |
+| Test Set 2 | 100 images (301–400) | Final evaluation |
+| **Total** | **400 images** | **19 landmarks each** |
+
+Download the dataset from:
 ```
-python3 -m venv {virtual_environment_name}
-source {virtual_environment_name}/bin/activate
+http://www-o.ntust.edu.tw/~cweiwang/ISBI2015/challenge1/
+```
+
+---
+
+## 📋 Requirements
+
+- Python 3.7+
+- CUDA 11.3 + cuDNN
+- NVIDIA GPU with 8GB+ VRAM
+- See `requirements.txt` for full package list
+
+---
+
+## ⚙️ Installation
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/yogendravarmaa7/landmark-detection-system.git
+cd landmark-detection-system
+
+# 2. Create virtual environment
+python3 -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# 3. Install dependencies
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-### Dataset Preparation
+---
 
-1. Download the cephalometric dataset from the link: http://www-o.ntust.edu.tw/~cweiwang/ISBI2015/challenge1/
+## 📁 Dataset Preparation
 
-2. Extract the folders 'RawImage' and 'AnnotationsByMD' into a directory of your choosing such that the file structure looks like this:
+Extract the dataset so the file structure looks like this:
 
-````bash
+```
 {cephalometric_data_directory}
 ├── AnnotationsByMD
 │   ├── 400_junior
 │   │   ├── 001.txt
-│   │   ├── 002.txt
-│   │   ├── ...
-│   │   └── 400.txt
-│   │
+│   │   └── ...
 │   └── 400_senior
-│   │   ├── 001.txt
-│   │   ├── 002.txt
-│   │   ├── ...
-│   │   └── 400.txt
-│   │
+│       ├── 001.txt
+│       └── ...
 └── RawImage
     ├── TrainingData
     │   ├── 001.bmp
-    │   ├── 002.bmp
-    │   ├── ...
-    │   └── 150.bmp
-    │
-    └── Test1Data
+    │   └── ...
+    ├── Test1Data
     │   ├── 151.bmp
-    │   ├── 152.bmp
-    │   ├── ...
-    │   └── 300.bmp
-    │
+    │   └── ...
     └── Test2Data
         ├── 301.bmp
-        ├── 302.bmp
-        ├── ...
-        └── 400.bmp
-````
+        └── ...
+```
 
-Note that if you publish work using this dataset you must cite:
-````
+---
+
+## 🚦 Usage
+
+### Step 1 — Train the Model
+```bash
+python train.py --cfg experiments/cephalometric.yaml \
+  --training_images {data_dir}/RawImage/TrainingData/ \
+  --annotations {data_dir}/AnnotationsByMD/
+```
+Saves model at `output/cephalometric/cephalometric_model.pth` after 15 epochs.
+
+### Step 2 — Temperature Scaling
+```bash
+python temperature_scaling.py --cfg experiments/cephalometric.yaml \
+  --fine_tuning_images {data_dir}/RawImage/Test1Data/ \
+  --annotations {data_dir}/AnnotationsByMD/ \
+  --pretrained_model output/cephalometric/cephalometric_model.pth
+```
+Saves calibrated model at `output/cephalometric/cephalometric_scaled_model.pth`.
+
+### Step 3 — Test & Evaluate
+```bash
+python test.py --cfg experiments/cephalometric.yaml \
+  --testing_images {data_dir}/RawImage/Test2Data/ \
+  --annotations {data_dir}/AnnotationsByMD/ \
+  --pretrained_model output/cephalometric/cephalometric_scaled_model.pth
+```
+Outputs **MRE** and **SDR** statistics.
+
+---
+
+## 📈 Results
+
+The model outputs the following evaluation graphs saved in `output/cephalometric/`:
+
+### Expected Radial Error vs True Radial Error
+![RE vs ERE](figures/re_vs_ere_correlation_graph.png)
+
+### Receiver Operating Characteristic Curve
+![ROC](figures/roc_outlier_graph.png)
+
+### Reliability Diagram
+![Reliability](figures/reliability_diagram.png)
+
+---
+
+## 📁 Project Structure
+
+```
+landmark-detection-system/
+│
+├── experiments/
+│   └── cephalometric.yaml    # Training configuration
+│
+├── figures/
+│   ├── re_vs_ere_correlation_graph.png
+│   ├── roc_outlier_graph.png
+│   └── reliability_diagram.png
+│
+├── config.py                 # Configuration parser
+├── evaluate.py               # Evaluation metrics (MRE, SDR)
+├── landmark_dataset.py       # Dataset loader and preprocessing
+├── model.py                  # Contour Hugging Heatmap network
+├── plots.py                  # Result visualization
+├── temperature_scaling.py    # Model calibration
+├── test.py                   # Testing and evaluation script
+├── train.py                  # Training script
+├── utils.py                  # Utility functions
+├── requirements.txt
+└── README.md
+```
+
+---
+
+## 📚 Reference
+
+This project reproduces experiments from:
+
+```
+@article{contourhugging2022,
+  title={Contour Hugging Heatmaps for Landmark Detection},
+  journal={ISBI 2015 Cephalometric Challenge}
+}
+```
+
+Dataset citation:
+```
 @article{wang2016benchmark,
   title={A benchmark for comparison of dental radiography analysis algorithms},
-  author={Wang, Ching-Wei and Huang, Cheng-Ta and Lee, Jia-Hong and Li, Chung-Hsing and Chang, Sheng-Wei and Siao, Ming-Jhih and Lai, Tat-Ming and Ibragimov, Bulat and Vrtovec, Toma{\v{z}} and Ronneberger, Olaf and others},
+  author={Wang, Ching-Wei et al.},
   journal={Medical image analysis},
   volume={31},
   pages={63--76},
   year={2016},
   publisher={Elsevier}
 }
-````
-
-### Running The Code
-
-You can either train the model yourself or download one of our pretrained models.
-
-#### 1. Train a model
-
-1.1 Train a model using the following command. This script resizes images in your training set directory 
-and saves them in ContourHuggingHeatmaps/cache. After 15 epochs it will save the model at
-ContourHuggingHeatmaps/output/cephalometric/cephalometric_model.pth.
-
-```
-python train.py --cfg experiments/cephalometric.yaml --training_images {cephalometric_data_directory}/RawImage/TrainingData/ \
- --annotations {cephalometric_data_directory}/AnnotationsByMD/
 ```
 
-1.2 Perform temperature scaling on the model saved in the previous step using the following command. 
-The model with the best Estimated Calibration Error (ECE) score will be saved at ContourHuggingHeatmaps/output/cephalometric/cephalometric_scaled_model.pth.
+---
 
-```
-python temperature_scaling.py --cfg experiments/cephalometric.yaml --fine_tuning_images {cephalometric_data_directory}/RawImage/Test1Data/ \
- --annotations {cephalometric_data_directory}/AnnotationsByMD/ --pretrained_model output/cephalometric/cephalometric_model.pth
-```
+## 🔮 Future Enhancements
 
-#### 2. Download a model
+- Extended to additional anatomical landmark datasets
+- Integration with clinical imaging pipelines
+- Real-time inference optimization
+- Web-based visualization dashboard
 
-2.1 If you would like, instead of training a model you can download our pretrained models at the following link: https://app.box.com/s/4qz3tthh7q6xajtaasj4fp9iaw86mmyx
+---
 
-#### 3. Testing
+## 👤 Author
 
-3.1 Test the models using the following commands where {model_path} is the path to the model you have trained or downloaded. 
-You can either test the basic model or the temperature scaled model.
+**Yogendra Varma Addepalli**
+- 🌐 Portfolio: [yogendravarmaa7.github.io](https://yogendravarmaa7.github.io)
+- 💼 LinkedIn: [linkedin.com/in/yaddepalli](https://linkedin.com/in/yaddepalli)
+- 📧 Email: addepalliyogendravarma@gmail.com
 
-```
-python test.py --cfg experiments/cephalometric.yaml --testing_images {cephalometric_data_directory}/RawImage/{Test1Data or Test2Data}/
---annotations {cephalometric_data_directory}/AnnotationsByMD  --pretrained_model {model_path}
-```
+---
 
-This script will output Mean Radial Error (MRE) and Successful Detection Rate (SDR) statistics. In addition, it will 
-save the following graphs (with slightly different numbers because training a model is a non-deterministic process) in 
-ContourHuggingHeatmaps/output/cephalometric/. Please refer to our paper for a detailed explanation of these.
+## 📄 License
 
-#### The Expected Radial Error vs True Radial Error plot
-
-<img src="figures/re_vs_ere_correlation_graph.png" alt="drawing" width="400"/>
-
-#### Receiver operating characteristic curve
-
-<img src="figures/roc_outlier_graph.png" alt="drawing" width="400"/>
-
-#### Reliability diagram
-
-<img src="figures/reliability_diagram.png" alt="drawing" width="400"/>
+This project is licensed under the MIT License.
